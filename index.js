@@ -5,12 +5,21 @@ function trataErro(erro) {
     throw new Error(chalk.red(erro.code, 'Não há arquivo no diretorio'));
 }
 
+// https://regex101.com/
+function extraiLinks(texto) {
+    const regex = /\[([^[\]]*?)\]\((https?:\/\/[^\s?$#.].[^\s]*)\)/gm;
+    const capturas = [...texto.matchAll(regex)];
+    const resultados = capturas.map(captura => ({[captura[1]]: captura[2]}));
+    return resultados;
+}
+
 // async/await
 async function pegaArquivo(caminhoDoArquivo) {
     try {
         const encoding = 'utf-8';
         const texto = await fs.promises.readFile(caminhoDoArquivo, encoding);
-        console.log(chalk.green(texto));
+        const resultado = extraiLinks(texto);
+        console.log(resultado);
     } catch (erro) {
         trataErro(erro);
     } finally {
@@ -18,14 +27,5 @@ async function pegaArquivo(caminhoDoArquivo) {
     }
 }
 
-// Promisses com Then
-/*function pegaArquivo(caminhoDoArquivo) {
-    const encoding = 'utf-8';
-    fs.promises.readFile(caminhoDoArquivo, encoding)
-    .then((texto) => console.log(chalk.green(texto)))
-    .catch(trataErro);
-}*/
-
 pegaArquivo('./arquivos/texto.md');
 
-//pegaArquivo('./arquivos/');
