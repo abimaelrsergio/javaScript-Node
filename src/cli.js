@@ -1,11 +1,25 @@
 import chalk from 'chalk';
+import fs from 'fs';
 import pegaArquivo from './index.js';
 
 const caminho = process.argv;
 
-async function processaTexto(caminho) {
-    const resultado = await pegaArquivo(caminho[2]);
+function imprimeLista(resultado) {
     console.log(chalk.blue('\n\nLista de links'), resultado);
+}
+
+async function processaTexto(argumentos) {
+    const caminho = argumentos[2];
+    if (fs.lstatSync(caminho).isFile()) {
+        const resultado = await pegaArquivo(caminho);
+        imprimeLista(resultado);
+    } else if (fs.lstatSync(caminho).isDirectory()) {
+        const arquivos = await fs.promises.readdir(caminho);
+        arquivos.forEach(async (nomeDoArquivo) => {
+            const resultado = await pegaArquivo(`${caminho}/${nomeDoArquivo}`);
+            imprimeLista(resultado);
+        })
+    }
 }
 
 processaTexto(caminho);
